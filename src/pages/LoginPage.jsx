@@ -1,57 +1,50 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
 import { useNavigate } from 'react-router-dom'
 import LoginForm from '../components/auth/LoginForm'
 import UserProfile from '../components/auth/UserProfile'
+import { useUser } from '../context/UserContext'
 
 function LoginPage() {
   const [isSignIn, setIsSignIn] = useState(true)
-  const [user, setUser] = useState(() => {
-    // Initialize user state from localStorage
-    const savedUser = localStorage.getItem('user')
-    return savedUser ? JSON.parse(savedUser) : null
-  })
   const navigate = useNavigate()
+  const { user, updateUser } = useUser()
 
   const handleGoogleSuccess = async (credentialResponse) => {
     console.log('Google login success:', credentialResponse)
     try {
       // Decode the JWT token to get user info
       const decoded = JSON.parse(atob(credentialResponse.credential.split('.')[1]))
+      console.log('Decoded token:', decoded) // For debugging
       const userInfo = {
         email: decoded.email,
         name: decoded.name,
-        picture: decoded.picture,
-        given_name: decoded.given_name
+        picture: decoded.picture, // Google profile photo URL
+        given_name: decoded.given_name,
+        family_name: decoded.family_name,
+        full_name: decoded.name,
+        locale: decoded.locale,
+        email_verified: decoded.email_verified
       }
-      // Save user info to localStorage
-      localStorage.setItem('user', JSON.stringify(userInfo))
-      setUser(userInfo)
+      // Update user info using context
+      updateUser(userInfo)
       // Navigate to dashboard after successful login
       navigate('/dashboard')
     } catch (error) {
-      console.log('Error processing login:', error)
+      console.error('Error processing login:', error)
     }
   }
 
   const handleGoogleError = () => {
-    console.log('Google login failed')
-    setUser(null)
-    localStorage.removeItem('user')
-  }
-
-  const handleSignOut = (e) => {
-    e.stopPropagation() // Prevent navigation when clicking sign out
-    setUser(null)
-    localStorage.removeItem('user') // Remove user data from localStorage
+    console.error('Google login failed')
+    updateUser(null)
   }
 
   // If user is already logged in, redirect to dashboard
-  useEffect(() => {
-    if (user) {
-      navigate('/dashboard')
-    }
-  }, [user, navigate])
+  if (user) {
+    navigate('/dashboard')
+    return null
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -107,29 +100,20 @@ function LoginPage() {
 
           <div className="mb-4">
             <div className="flex justify-center">
-              {user ? (
-                <div 
-                  onClick={() => navigate('/dashboard')}
-                  className="w-full"
-                >
-                  <UserProfile user={user} onLogout={handleSignOut} />
-                </div>
-              ) : (
-                <div className="w-full flex justify-center">
-                  <GoogleLogin
-                    size="large"
-                    text={isSignIn ? "continue_with" : "signup_with"}
-                    shape="rectangular"
-                    width={300}
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    useOneTap={false}
-                    flow="auth-code"
-                    auto_select={false}
-                    ux_mode="popup"
-                  />
-                </div>
-              )}
+              <div className="w-full flex justify-center">
+                <GoogleLogin
+                  size="large"
+                  text={isSignIn ? "continue_with" : "signup_with"}
+                  shape="rectangular"
+                  width={300}
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  useOneTap={false}
+                  flow="implicit"
+                  auto_select={false}
+                  ux_mode="popup"
+                />
+              </div>
             </div>
           </div>
 
