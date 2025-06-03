@@ -55,21 +55,17 @@ function LoginPage() {
 
   return (
     <>
-      {/* Mobile Navigation Bar */}
-      <nav className="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-md z-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
-            <div className="text-2xl font-medium">
-              <span className="bg-gradient-to-r from-blue-300 to-blue-500 inline-block text-transparent bg-clip-text">Fast</span>
-              <span className="text-slate-800">Graduate</span>
-            </div>
-          </div>
+      {/* Mobile Logo */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white py-4 px-6 shadow-sm z-50">
+        <div className="text-2xl font-medium">
+          <span className="bg-gradient-to-r from-blue-300 to-blue-500 inline-block text-transparent bg-clip-text">Fast</span>
+          <span className="text-slate-800">Graduate</span>
         </div>
-      </nav>
+      </div>
 
       <div className="min-h-screen flex flex-col lg:flex-row">
-        {/* Content padding for mobile nav */}
-        <div className="lg:hidden h-16"></div>
+        {/* Content padding for mobile logo */}
+        <div className="lg:hidden h-14"></div>
 
         {/* Left Banner */}
         <div className="hidden lg:flex lg:w-1/2 relative bg-slate-600">
